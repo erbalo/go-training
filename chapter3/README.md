@@ -648,7 +648,7 @@ For the above entities we need the following:
 - Append an order line
 - Update an order line
 - Remove an order line
-- Print the total price in EURO
+- Print the total price
 
 ## Interfaces
 
@@ -699,16 +699,16 @@ In computer programming, green threads are threads that are scheduled by a runti
 
 Some example languages are:
 
-- .NET Framework ([[https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming][TPL]])
-- Erlang (Processes, Actor)
-- Haskell
-- and off course Go with goroutines
+- .NET Framework's ([[https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming][TPL]])
+- Erlang (Processes, Actors)
+- Haskell's coroutines
+- Go's goroutines
 
 ### Goroutines
 
 - no thread pool
 - small stack compared to other implementations (4kB instead of 1-8MB) which makes them cheap to create
-- if a goroutine blocks (network, sleeping, channels, sync...) another will be used instead
+- if a goroutine blocks (network, sleeping, channels, sync...) another will be scheduled instead
 
 ```go
 go func(a int){
