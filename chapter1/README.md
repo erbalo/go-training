@@ -37,6 +37,7 @@ After installing it you have to setup some file watchers in order to trigger the
 - Tools
 - File watchers
 - Click on the plus sign and add gofmt and  goimports
+- Change the `Level` of each watcher to `Global` so it will stay activated for all future projects
 - Click ok and restart IDE
 
 ### Vim
