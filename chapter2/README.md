@@ -47,6 +47,7 @@ You can see more details following the [link](https://golang.org/doc/effective_g
 
 - short, prefer transport over transportmechanism
 - clear, like logging, postgres
+- singular, e.g. `user` and not the plural `users`
 - avoid catchall packages like utils, helpers, models
 - since the package name is part of the declaration of a type we should use it e.g. a package named `cache` with a constructor `NewCache()` can be rename to just `New()` since the usage will always contain the package name `cache.New()`
 
