@@ -466,9 +466,9 @@ You can have multiple defers and they get executed in a LIFO fashion so the foll
 
 ```go
 func lifo() {
-defer fmt.Print(3)
-defer fmt.Print(2)
-defer fmt.Print(1)
+    defer fmt.Print(3)
+    defer fmt.Print(2)
+    defer fmt.Print(1)
 }
 ```
 
