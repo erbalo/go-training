@@ -120,7 +120,7 @@ mp["test"] = 10
 
 If the key does not exist it will be created and the value added. If the key exists it will update the value.
 
-We can get a value bye accessing the key:
+We can get a value by accessing the key:
 
 ```go
 d := mp["test"]
@@ -460,7 +460,7 @@ func (b *Balance) Update(amount int) {
 }
 ```
 
-The mutex unlock is guaranteed to run before the method exists.
+The mutex unlock is guaranteed to run before the method exits.
 
 You can have multiple defers and they get executed in a LIFO fashion so the following function will print `1,2,3`:
 

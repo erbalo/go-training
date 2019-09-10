@@ -90,3 +90,9 @@ The above builds the code as an executable named `chapter1`
     go install
 
 This works only if your code resides inside the GOPATH.
+
+## Appendix
+
+### Add go binaries to your path
+
+    export PATH="$(go env GOPATH)/bin:$PATH"

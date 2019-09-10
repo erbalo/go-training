@@ -72,7 +72,7 @@ for i, t := range tt {
 - Avoid repeating the package name in name of function and methods e.g. prefer `log.Info()` than `log.LogInfo()`.
 - Go does not have getters and setters so the convention given a unexported field named `age` is `Age()` for the getter and `SetAge(age int)` for the setter.
 
-### interfaces
+### Interfaces
 
 The name of the interface should be whatever the function is plus a "er" at the end
 
