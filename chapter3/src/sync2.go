@@ -13,7 +13,7 @@ type sum struct {
 func (s *sum) add(i int) {
 	s.Lock()
 	defer s.Unlock()
-	s.sum = s.sum + 1
+	s.sum = s.sum + i
 }
 
 func main() {

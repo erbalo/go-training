@@ -556,7 +556,7 @@ func (c *Customer) SetAge(age int) error {
 ### Value vs Pointer Receiver
 
 In the above example the receiver is the part in parenthesis between the keyword `func` and the name of the method `SetAge`.
-You should think that the receiver will be the first argument of the method:
+You should think as if the receiver is the first argument of the method:
 
 ```go
 func SetAge(c *Customer, age int) error {
