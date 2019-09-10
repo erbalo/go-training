@@ -485,7 +485,7 @@ panic(1)
 }
 ```
 
-Now that we have a mechanism to recover from panics someone might thing that it is like a `try catch` and starts to use panics like exceptions. Remember that panics should be avoided.
+Now that we have a mechanism to recover from panics someone might think that it is like a `try catch` and starts to use panics like exceptions. Remember that panics should be avoided.
 
 ## Structs
 
@@ -556,7 +556,7 @@ func (c *Customer) SetAge(age int) error {
 ### Value vs Pointer Receiver
 
 In the above example the receiver is the part in parenthesis between the keyword `func` and the name of the method `SetAge`.
-You should thing that the receiver will be the first argument of the method:
+You should think that the receiver will be the first argument of the method:
 
 ```go
 func SetAge(c *Customer, age int) error {
