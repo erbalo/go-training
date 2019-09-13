@@ -23,7 +23,7 @@ CREATE TABLE `employee` (
 ```
 
 ```bash
-docker run --name go-training -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
+docker run --name go-training -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7
 ```
 
 Let's assume that we have an Employee that needs to be persisted in a RDBMS (MySQL, PostgreSQL, etc.)

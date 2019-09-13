@@ -144,7 +144,7 @@ and the following disadvantages:
 
 ### Other
 
-You can always make changes to the `go.mod` file by hand but you should then use `go mo tidy` and `go mod vendor` in order to sync your repo.
+You can always make changes to the `go.mod` file by hand but you should then use `go mod tidy` and `go mod vendor` in order to sync your repo.
 
 As a rule of thumb we should always, after a change in dependency, call:
 

@@ -892,8 +892,6 @@ fmt.Print(", World!\n")
 
 - Loop and close (channel4.go)
 
-.play src/channel4.go  /START OMIT/,/END OMIT/
-
 ```go
 ch := make(chan string, 4)
 chSig := make(chan struct{})

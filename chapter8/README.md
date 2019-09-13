@@ -40,6 +40,7 @@ Unfortunately there is no standard recommendation for the layout but some of the
 ## Advanced
 
 - [Go Slices: usage and internals](https://blog.golang.org/go-slices-usage-and-internals)
+- [Slice tricks](https://github.com/golang/go/wiki/SliceTricks)
 
 ## Concurrency
 
