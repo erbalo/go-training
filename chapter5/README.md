@@ -151,6 +151,10 @@ As a rule of thumb we should always, after a change in dependency, call:
 - `go mod tidy`
 - `go mod vendor`, if we are vendoring
 
+To clean up the mod cache and force downloading dependencies again, call:
+
+- `go clean -cache`
+
 Check out [Chapter 8 - Further studying material](../chapter8/README.md).
 
 ## Linting
