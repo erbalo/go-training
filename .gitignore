@@ -14,3 +14,6 @@
 # Visual Studio Code files
 .vscode
 __debug_bin
+
+# GoLand files
+.idea
