@@ -123,3 +123,6 @@ and every go file in every package will be formated with the only style that act
 Visual Studio Code will setup this formatting automatically on each save and Goland has to be setup with file watchers.
 
 The only thing that *gofmt* does not handle is line wrapping. Go has no line length limit. If a line feels too long, wrap it and indent with an extra tab.
+
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 3**](../chapter3/README.md)<br>
+[<- Previous&nbsp;: **Chapter 1**](../chapter1/README.md)

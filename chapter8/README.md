@@ -70,3 +70,5 @@ Unfortunately there is no standard recommendation for the layout but some of the
 ## Online Learning Courses
 
 - [Learn How To Code: Google's Go (golang) Programming Language (not free)](https://www.udemy.com/course/learn-how-to-code/)
+
+[<- Previous&nbsp;: **Chapter 7**](../chapter7/README.md)

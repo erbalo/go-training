@@ -96,3 +96,5 @@ This works only if your code resides inside the GOPATH.
 ### Add go binaries to your path
 
     export PATH="$(go env GOPATH)/bin:$PATH"
+
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 2**](../chapter2/README.md)

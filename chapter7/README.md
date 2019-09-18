@@ -98,3 +98,6 @@ Hint: Watch out for HTTP content negotiation and response content type.
   - deployment
   - scripts
   - etc.
+
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 8**](../chapter8/README.md)<br>
+[<- Previous&nbsp;: **Chapter 6**](../chapter6/README.md)

@@ -1225,3 +1225,6 @@ go func() {
     }
 }()
 ```
+
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 4**](../chapter4/README.md)<br>
+[<- Previous&nbsp;: **Chapter 2**](../chapter2/README.md)
