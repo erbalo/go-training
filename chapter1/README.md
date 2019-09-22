@@ -68,6 +68,12 @@ We will create a small program in order to show how to use the go CLI and the de
 
 ### Debugging
 
+If running on macOS, make sure you have Xcode command line tools installed: 
+
+```
+xcode-select --install
+```
+
 - Open the folder where the go training has been cloned with VS Code
 - Open the `main.go` file under the following path `chapter1/src`
 - Add a breakpoint on the `fmt.Printf` statement
