@@ -448,6 +448,25 @@ func main() {
 
 Arguments are always passed in by value, meaning you get a copy. If you want to modify the argument or if you want to avoid the copy of a big struct you should use a pointer.
 
+You can create variadic functions as follows:
+
+```go
+func add(values ...int) int {
+    sum := 0
+    for _, val := range values {
+        sum += val
+    }
+    return sum
+}
+```
+
+which can be called:
+
+```go
+sum1 := add(1, 2, 3, 4)
+sum2 := add(1, 2, 3, 4, 6, 7, 8)
+```
+
 ### Defer
 
 Go's defer statement schedules a function call (the deferred function) to be run immediately before the function executing the defer returns. A classic example is a mutex operation:
