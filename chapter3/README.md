@@ -97,6 +97,13 @@ numbers[:3] // [0 1 2]
 numbers[4:] // [4 5 6 7 8]
 ```
 
+We can `expand` a slice in order to be passed into a variadic function e.g. `func add(values ...int) int`:
+
+```go
+vv := []int{1, 2, 3, 4, 5}
+sum := add(vv...)
+```
+
 More details can be found in [Go Slices: usage and internals](https://blog.golang.org/go-slices-usage-and-internals).
 
 ### Maps
