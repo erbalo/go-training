@@ -20,4 +20,4 @@ The training is split up in chapters as follows:
 - [Chapter 5 - Dependency Management and Tools](chapter5/README.md)
 - [Chapter 6 - OSS @ Beat](chapter6/README.md)
 - [Chapter 7 - It’s your turn now](chapter7/README.md)
-- [Chapter 8 - Further studying material](chapter8/README.md)
+- [References - Further studying material](References/README.md)

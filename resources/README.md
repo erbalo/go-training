@@ -1,4 +1,4 @@
-# Chapter 8 - Further studying material
+# Resources - Further studying material
 
 ## Books (Paper and Online)
 
@@ -10,9 +10,10 @@
 
 - [FAQ](https://golang.org/doc/faq)
 
-## Workshops
+## Workshops and Training
 
 - [BEAT Workshops](https://github.com/taxibeat/go-workshop)
+- [A Tour of Go](https://tour.golang.org)
 
 ## Philosophy and guidelines
 
