@@ -650,6 +650,86 @@ func NewCustomer1(id int, created time.Time, name string) *Customer1 {
 }
 ```
 
+#### Conflicts
+
+Let's assume we have two interfaces (Reader1, Reader2) and we want to compose a new one from these two (Reader):
+
+```go
+type Reader1 interface {
+    Read() string
+}
+
+type Reader2 interface {
+    Read() string
+}
+
+type Reader interface {
+    Reader1
+    Reader2
+}
+```
+
+the compiler will report an error `duplicate method Read`.
+
+Let's assume that we have the following structs along with a composition:
+
+```go
+type Base1 struct {
+    ID string
+}
+
+func (b Base1) Code() string {
+    return b.ID
+}
+
+type Base2 struct {
+    ID string
+}
+
+func (b Base2) Code() string {
+    return b.ID
+}
+
+type Base struct {
+    Base1
+    Base2
+}
+```
+
+The following usages will return an compiler error `ambiguous selector b.ID` and `ambiguous selector b.Code`:
+
+```go
+b := Base{Base1: Base1{ID: "1"}, Base2: Base2{ID: "2"}}
+fmt.Print(b.ID)
+fmt.Print(b.Code())
+```
+
+There are two options to fix this, either to call the specific embedded struct:
+
+```go
+fmt.Print(b.Base1.ID)
+fmt.Print(b.Base2.Code())
+```
+
+or to create new methods on `Base`:
+
+```go
+func (b Base) Code() string {
+    return b.Base1.Code()
+}
+
+func (b Base) ID() string {
+    return b.Base2.ID
+}
+```
+
+and now we can call:
+
+```go
+fmt.Print(b.ID())
+fmt.Print(b.Code())
+```
+
 ### Exercise
 
 We have the following Entities:
