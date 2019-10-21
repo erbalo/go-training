@@ -113,11 +113,14 @@ which adds missing and remove unused modules.
 ### IDE Integration
 
 #### Visual Studio Code
-Go Modules support in Visual Studio Code is a bit limited, you can see known issues and progress here: https://github.com/Microsoft/vscode-go/wiki/Go-modules-support-in-Visual-Studio-Code  
-For now whenever you update a module make sure to restart Visual Studio Code so the language server will be restarted. 
+
+Go Modules support in Visual Studio Code is a bit limited, you can see known [issues and progress](https://github.com/Microsoft/vscode-go/wiki/Go-modules-support-in-Visual-Studio-Code).
+For now whenever you update a module make sure to restart Visual Studio Code so the language server will be restarted.
 
 #### GoLand
+
 Follow these steps to enable to Go Modules integration in GoLand:
+
 1. Open GoLand settings
 2. Go to Go -> Go Modules (vgo)
 3. Make sure "Enable Go Modules (vgo) integration" is checked
@@ -281,5 +284,5 @@ and the second stage:
 - uses `scratch` as the base container (for more advanced scenarios you might go for alpine)
 - copies only the executable from the builder stage
 
-[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 6**](../chapter6/README.md)<br>
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 6**](../chapter6/README.md)  
 [<- Previous&nbsp;: **Chapter 4**](../chapter4/README.md)

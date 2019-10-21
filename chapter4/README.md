@@ -296,5 +296,5 @@ Where (Lat/Lng):
 
 We should benchmark the performance of this function with Athens and Amsterdam as input.
 
-[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 5**](../chapter5/README.md)<br>
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 5**](../chapter5/README.md)  
 [<- Previous&nbsp;: **Chapter 3**](../chapter3/README.md)

@@ -96,5 +96,5 @@ Configuration can be obtained from the following sources:
 - Flag values, are obtained from CLI flags with the form -flag=value
 - Consul, which is used to get initial values and to monitor them for changes
 
-[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 7**](../chapter7/README.md)<br>
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 7**](../chapter7/README.md)  
 [<- Previous&nbsp;: **Chapter 5**](../chapter5/README.md)

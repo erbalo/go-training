@@ -601,7 +601,7 @@ When you should use a pointer receiver?
 
 Hint: As with pointer, try not to optimize by using only pointers since this might put stress on the GC. Optimize only if there is an actual problem.
 
-### Embedding
+### Struct Embedding
 
 Let's assume that we have a base entity type with the following fields:
 
@@ -780,7 +780,7 @@ Since generics are not available and there is a need to cover the possibility th
 
 One of the Go provers states `The empty interface says nothing` and we should only use it if it is absolutely necessary.
 
-### Embedding
+### Interface Embedding
 
 Given the above single method interfaces it is easy to compose a bigger one as follows:
 
@@ -801,11 +801,11 @@ type ReadCloser interface {
 
 ### Green threads
 
-In computer programming, green threads are threads that are scheduled by a runtime library or virtual machine (VM) instead of natively by the underlying operating system. Green threads emulate multi-threaded environments without relying on any native OS capabilities, and they are managed in user space instead of kernel space, enabling them to work in environments that do not have native thread support ([[https://en.wikipedia.org/wiki/Green_threads][wiki]]).
+In computer programming, green threads are threads that are scheduled by a runtime library or virtual machine (VM) instead of natively by the underlying operating system. Green threads emulate multi-threaded environments without relying on any native OS capabilities, and they are managed in user space instead of kernel space, enabling them to work in environments that do not have native thread support ([wiki](https://en.wikipedia.org/wiki/Green_threads)).
 
 Some example languages are:
 
-- .NET Framework's ([[https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming][TPL]])
+- .NET Framework's [TPL](https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
 - Erlang (Processes, Actors)
 - Haskell's coroutines
 - Go's goroutines
@@ -911,7 +911,7 @@ close(ch)
 
 - Delayed Guarantee
 
-    A buffered channel of size =1 gives you a delayed guarantee. 
+    A buffered channel of size =1 gives you a delayed guarantee.
     It can guarantee that the previous signal that was sent has been received,
     because the receive of the first signal, happens before the send of the second signal completes.
 
@@ -1332,5 +1332,5 @@ go func() {
 }()
 ```
 
-[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 4**](../chapter4/README.md)<br>
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 4**](../chapter4/README.md)  
 [<- Previous&nbsp;: **Chapter 2**](../chapter2/README.md)

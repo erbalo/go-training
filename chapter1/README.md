@@ -49,7 +49,7 @@ You have to:
 - [Install plugin manager](https://github.com/junegunn/vim-plug)
 - [Plug vim-go](https://github.com/fatih/vim-go)
 - [Example .vimrc file](https://github.com/fatih/dotfiles/blob/master/vimrc)
-- Customize your .vimrc by binding the commands found in https://github.com/fatih/vim-go/blob/master/doc/vim-go.txt to the hotkeys of your preference.
+- Customize your .vimrc by binding the commands found in <https://github.com/fatih/vim-go/blob/master/doc/vim-go.txt> to the hotkeys of your preference.
 
 ### Debug support
 
@@ -68,9 +68,9 @@ We will create a small program in order to show how to use the go CLI and the de
 
 ### Debugging
 
-If running on macOS, make sure you have Xcode command line tools installed: 
+If running on macOS, make sure you have Xcode command line tools installed:
 
-```
+```bash
 xcode-select --install
 ```
 
@@ -81,19 +81,25 @@ xcode-select --install
 
 ### Run from command line
 
-    go run main.go
+```bash
+go run main.go
+```
 
 The above builds and runs the code
 
 ### Build from command line
 
-    go build -o chapter1
+```bash
+go build -o chapter1
+```
 
 The above builds the code as an executable named `chapter1`
 
 ### Install the executable in the go bin folder (only if project is in the GOPATH)
 
-    go install
+```bash
+go install
+```
 
 This works only if your code resides inside the GOPATH.
 
@@ -101,6 +107,8 @@ This works only if your code resides inside the GOPATH.
 
 ### Add go binaries to your path
 
-    export PATH="$(go env GOPATH)/bin:$PATH"
+```bash
+export PATH="$(go env GOPATH)/bin:$PATH"
+```
 
 [-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 2**](../chapter2/README.md)
