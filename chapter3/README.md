@@ -1051,7 +1051,34 @@ childCtx, cnl := context.WithTimeout(ctx, 1 * time.Second)
 cnl() // or timeout passed
 ```
 
-Context can be used to propagate cross-functional stuff also.
+- func WithValue(parent Context, key, val interface{}) Context
+
+Use context Values only for request-scoped data that transits processes and APIs, not for passing optional parameters to functions.
+
+```go
+type favContextKey string
+
+f := func(ctx context.Context, k favContextKey) {
+    if v := ctx.Value(k); v != nil {
+        fmt.Println("found value:", v)
+        return
+    }
+    fmt.Println("key not found:", k)
+}
+
+k := favContextKey("language")
+ctx := context.WithValue(context.Background(), k, "Go")
+
+f(ctx, k)
+f(ctx, favContextKey("color"))
+```
+
+Which prints out:
+
+```bash
+found value: Go
+key not found: color
+```
 
 **The convention is that every function or method that need to use or propagate context has it as its first argument:**
 
