@@ -1121,7 +1121,7 @@ Package sync provides basic synchronization primitives such as mutual exclusion 
 Other than the Once and WaitGroup types, most are intended for use by low-level library routines.
 Higher-level synchronization is better done via channels and communication.
 
-#### WaitGroup (sync1.go)
+#### [WaitGroup](src/sync1/main.go)
 
 A WaitGroup waits for a collection of goroutines to finish.
 The main goroutine calls Add to set the number of goroutines to wait for.
@@ -1173,7 +1173,7 @@ func main() {
 }
 ```
 
-Check out the [full example](src/sync2.go).
+Check out the [full example](src/sync2/main.go).
 
 - RWMutex
 
@@ -1220,7 +1220,7 @@ for result := range results {
 }
 ```
 
-Take a look at the [full example](src/pattern1.go).
+Take a look at the [full example](src/pattern1/main.go).
 
 #### Fan Out/In
 
@@ -1257,7 +1257,7 @@ for result := range results {
 }
 ```
 
-Take a look at the [full example](src/pattern2.go).
+Take a look at the [full example](src/pattern2/main.go).
 
 - Work stealing
 
@@ -1290,7 +1290,7 @@ for result := range results {
 }
 ```
 
-Take a look at the [full example](src/pattern3.go).
+Take a look at the [full example](src/pattern3/main.go).
 
 ### Error handling
 
