@@ -99,5 +99,5 @@ Hint: Watch out for HTTP content negotiation and response content type.
   - scripts
   - etc.
 
-[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 8**](../chapter8/README.md)  
+[-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Resources**](../resources/README.md)  
 [<- Previous&nbsp;: **Chapter 6**](../chapter6/README.md)

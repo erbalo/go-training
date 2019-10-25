@@ -297,13 +297,6 @@ for i, price := range prices {
 
 where `i` is the index in the slice and `price` is the value at that index. For maps the range returns the key and the value.
 
-- switch
-- type switch
-- if
-  - if condition {}
-  - if err:=something(); err != nil {}
-  - if ok:=something(); ok {}
-
 ## Errors
 
 ### Handling

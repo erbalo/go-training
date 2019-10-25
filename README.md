@@ -9,6 +9,32 @@ The go-training repository contains training material in order to get familiar w
 
 We will use Visual Studio Code throughout the training.
 
+## Trainers
+
+- Constantinos Christofilos (@c0nstantx)
+- Dimitris Soufleros (@dsoufleros)
+- Lazaros Tsigkakos (@Lazaros-Tsigkakos)
+- Sotirios Mantziaris (@mantzas)
+- Alexandros Panagiotou (@apanagiotou)
+- Angelos Giannis (@Angelos-Giannis)
+- Christos Papidas (@cpapidas)
+- Deleio D'Anna (@delioda79)
+- George Georgiou (@georgegg)
+- Siavash Safi (@siavashs)
+- Sotiris Poulias (@sotirispl)
+- Stefanos Platonis (@Stefos)
+- Stratos Neiros (@nstratos)
+- Vasilis Oikonomou (@Vaoiko)
+
+## Contributing
+
+In order to propose a change or addition, we should:
+
+- Open a ticket and discuss if necessary
+- Make the PR
+- Let the others code review
+- If the majority (2/3) agree we can merge
+
 ## Chapters
 
 The training is split up in chapters as follows:

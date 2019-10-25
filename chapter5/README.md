@@ -158,7 +158,7 @@ To clean up the mod cache and force downloading dependencies again, call:
 
 - `go clean -cache`
 
-Check out [Chapter 8 - Further studying material](../chapter8/README.md).
+Check out [Resources - Further studying material](../resources/README.md).
 
 ## Linting
 
