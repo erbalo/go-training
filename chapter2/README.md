@@ -129,29 +129,29 @@ As you might see the list is big and we need to organize them a lot better in or
 We might organize our projects following the below structure (project named `myservice`):
 
 - [myservice](#root-myservice)
-  - [build [REQ]](#build)
-    - [Dockerfile [REQ]](#dockerfile)
-    - [Jenkinsfile.ci [OPT]](#jenkinsfile-ci)
-  - [cmd [REQ]](#cmd)
+  - [cmd [OPT]](#cmd)
   - [config [OPT]](#config)
-  - [deployment [REQ]](#deployment)
-    - [local [OPT]](#local)
-    - [helm [OPT]](#helm)
-    - [infra [OPT]](#infra)
-    - [Jenkinsfile.cd [REQ]](#Jenkinsfile-cd)
+  - [internal [OPT]](#internal)
+  - [infra [REQ]](#infra)
+    - [build [OPT]](#build)
+      - [Dockerfile [REQ]](#dockerfile)
+      - [Jenkinsfile.ci [OPT]](#jenkinsfile-ci)
+    - [deploy [REQ]](#deploy)
+      - [local [OPT]](#local)
+      - [helm [OPT]](#helm)
+      - [terraform [OPT]](#terraform)
+      - [Jenkinsfile [REQ]](#Jenkinsfile-cd)
+    - [observe [OPT]](#observe)
+      - [dashboard [OPT]](#dashboard)
+      - [alerting [OPT]](#alerting)  
   - [doc [REQ]](#doc)
   - [example [OPT]](#example)
-  - [internal [REQ]](#internal)
-  - [observability [REQ]](#observability)
-    - [dashboard [REQ]](#dashboard)
-    - [alerting [REQ]](#alerting)
-  - [pkg [OPT]](#pkg)
   - [script [OPT]](#script)
   - [test [OPT]](#test)
   - [tool [OPT]](#tool)
-  - [vendor [OPT]](#vendor)
+  - [vendor [REQ]](#vendor)
   - [.travis.yml [OPT]](#travis)
-  - [go.mod and go.sum [OPT]](#go-modules)
+  - [go.mod and go.sum [REQ]](#go-modules)
   - [Makefile [OPT]](#makefile)
   - [README.md [REQ]](#readme-file)
   - [.gitignore [REQ]](#gitignore)
@@ -162,10 +162,106 @@ Conventions here are the following:
 
 - folder/package names are in singular format
 - folder/package names should be short
+- all go packages in the root folder can be imported by others projects
+- all packages in the `internal` folder are private to the repository and cannot be imported by other projects
 
 ### root (myservice)
 
 The following files are contained, along with the other folders:
+
+### cmd
+
+Main entrypoints for this project.  
+The directory name for each entrypoint should match the name of the executable you want to have e.g. `/cmd/myservice/main.go`.
+
+### config
+
+Configuration file templates or default configs e.g. `env` files.
+
+### internal
+
+Private application and library code that should not be imported by other projects.  
+
+### infra
+
+This folder groups everything infra related together.
+
+#### build
+
+Packaging and Continuous Integration. This folder should contains
+
+##### Dockerfile
+
+The standard dockerfile to create the deployment artifact of the service.
+
+##### Jenkinsfile CI
+
+If the project uses Jenkins as a CI server the ci file should be in here.
+
+#### deploy
+
+Group deployment related files and folders.  
+The root folder should contain:
+
+- `Jenkinsfile`
+
+##### local
+
+Local deployment setup e.g. `docker-compose`. Local Kubernetes will deprecate this.
+
+##### helm
+
+Helm packages for the deployment. Each deployable unit should have a sub-folder.
+
+##### terraform
+
+Terraform files for setting up infrastructure.
+
+##### Jenkinsfile CD
+
+The Jenkinsfile responsible for deployment of the service.
+
+#### observe
+
+Artifacts needed to observe our service.
+
+##### dashboard
+
+Dashboards for Grafana.
+
+##### alerting
+
+Alerts for Prometheus AlertManager.
+
+### doc
+
+Design and user documents (in addition to your godoc generated documentation).  
+Things that could be in there are:
+
+- OpenAPI documentation used by [Hypatia](https://github.com/taxibeat/hypatia)
+- Architecture diagrams
+- Run-books
+- etc.
+
+### example
+
+Examples for your applications and/or public libraries.
+
+### script
+
+Contains all scripts of the project.
+
+### test
+
+Additional external test apps and test data. Functional tests should live here.
+
+### tool
+
+Supporting tools for this project.
+
+### vendor
+
+Application dependencies.
 
 #### travis
 
@@ -186,105 +282,6 @@ Readme contains entry-point of the service documentation, which will be displaye
 #### gitignore
 
 The standard .gitignore file.
-
-### build
-
-Packaging and Continuous Integration. This folder should contains
-
-#### Dockerfile
-
-The standard dockerfile to create the deployment artifact of the service.
-
-#### Jenkinsfile CI
-
-If the project uses Jenkins as a CI server the ci file should be in here.
-
-### cmd
-
-Main applications for this project.  
-The directory name for each application should match the name of the executable you want to have e.g. `/cmd/myservice/main.go`.
-
-### config
-
-Configuration file templates or default configs e.g. `env` files.
-
-### deployment
-
-Group deployment related files and folders.  
-The root folder should contain:
-
-- `Jenkinsfile.cd`
-
-#### local
-
-Local deployment setup e.g. `docker-compose`. Local Kubernetes will deprecate this.
-
-#### helm
-
-Helm packages for the deployment. Each deployable unit should have a sub-folder.
-
-#### infra
-
-Infrastructure as code e.g. `terraform` files.
-
-#### Jenkinsfile CD
-
-The Jenkinsfile responsible for deployment of the service.
-
-### doc
-
-Design and user documents (in addition to your godoc generated documentation).  
-Things that could be in there are:
-
-- OpenAPI documentation used by [Hypatia](https://github.com/taxibeat/hypatia)
-- Architecture diagrams
-- Run-books
-- etc.
-
-### example
-
-Examples for your applications and/or public libraries.
-
-### internal
-
-Private application and library code that should not be imported by other projects.  
-
-As an example of a project that follows [DDD](https://en.wikipedia.org/wiki/Domain-driven_design) and the [Ports and Adapters](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)) Architecture approach the layout could contain the following sub-folders:
-
-- app/domain, where all the domain code resides along with the interfaces [Ports] that communicate with infrastructure (DB, HTTP, e.g.)
-- infra, where all concrete implementations [Adapters] of the above interfaces [Ports] reside e.g. [REMS](https://github.com/taxibeat/rems)
-
-### observability
-
-Artifacts needed to observe our service.
-
-#### dashboard
-
-Dashboards for Grafana.
-
-#### alerting
-
-Alerts for Prometheus AlertManager.
-
-### pkg
-
-Library code that's ok to use by external applications.
-
-### script
-
-Contains all scripts of the project.
-
-### test
-
-Additional external test apps and test data. Functional tests should live here.
-
-### tool
-
-Supporting tools for this project.
-
-### vendor
-
-Application dependencies.
 
 ## Formatting
 
