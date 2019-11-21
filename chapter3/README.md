@@ -42,7 +42,7 @@ Declaration will always initialize the variable to the default value of a type:
 You can declare an array as follows:
 
 ```go
-var variable_name [SIZE] variable_type
+var variable_name [SIZE]variable_type
 ```
 
 e.g.
@@ -53,7 +53,7 @@ var balance [10]float32
 
 ### Slices
 
-A slice is a abstraction over an array. It actually uses arrays as an underlying structure, but it allows for growth and or returning a sub-array.
+A slice is an abstraction over an array. It actually uses arrays as an underlying structure, but it allows for growth and or returning a sub-array.
 
 We can declare them as follows:
 
@@ -229,7 +229,7 @@ p := new(SyncedBuffer)  // type *SyncedBuffer
 var v SyncedBuffer      // type  SyncedBuffer
 ```
 
-the resulting `buf` will be a pointer to a zeroed out initialized `SyncedBuffer` and the `buf1` will be a initialized variable of `SyncedBuffer`.
+the resulting `p` will be a pointer to a zeroed out initialized `SyncedBuffer` and the `v` will be a initialized variable of `SyncedBuffer`.
 
 Both of the above will actually have a `SyncedBuffer` initialized which means that `lock`(in a unlocked state) and buffer(empty buffer ready to use) fields will be initialized to their defaults, and ready for use.
 
@@ -241,7 +241,7 @@ The storage location does have an effect on writing efficient programs. When pos
 
 In the current compilers, if a variable has its address taken, that variable is a candidate for allocation on the heap. However, a basic escape analysis recognizes some cases when such variables will not live past the return from the function and can reside on the stack.
 
-There is a way to check what happens in your code in order to see where a variable will be allocated. This is called escape analysis and is a advanced topic not covered here.
+There is a way to check what happens in your code in order to see where a variable will be allocated. This is called escape analysis and is an advanced topic not covered here.
 
 In general we should not hunt for performance optimizations of these types and focus on the task at hand. Optimization can always take place in the future and after it becomes a problem. This is why it makes sense for some services to monitor also the memory and the GC of a Go process.
 
