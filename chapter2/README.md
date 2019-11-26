@@ -133,7 +133,7 @@ We might organize our projects following the below structure (project named `mys
   - [config [OPT]](#config)
   - [internal [OPT]](#internal)
   - [infra [REQ]](#infra)
-    - [build [OPT]](#build)
+    - [build [REQ]](#build)
       - [Dockerfile [REQ]](#dockerfile)
       - [Jenkinsfile.ci [OPT]](#jenkinsfile-ci)
     - [deploy [REQ]](#deploy)
