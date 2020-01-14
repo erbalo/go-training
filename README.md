@@ -25,6 +25,8 @@ We will use Visual Studio Code throughout the training.
 - Stefanos Platonis (@Stefos)
 - Stratos Neiros (@nstratos)
 - Vasilis Oikonomou (@Vaoiko)
+- Kanan Rahimov (@KenanBek)
+- Pavel Shtanko (@pavelshtanko)
 
 ## Contributing
 
