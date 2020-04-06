@@ -1,288 +1,300 @@
-# Chapter 5 - Dependency Management and Tools
+# Chapter 5 - Tests and Benchmarks
 
-## Go Modules
+## Testing
 
-In order to demonstrate go modules we will create a new folder `test` and place a `main.go` file in it with the following content:
+### Test file location
+
+By convention the test files are collocated with the actual code files.
+We have the following convention for test file naming, given that the name of the file which contains the code to be tested is `repository.go`:
+
+#### Unit tests
+
+Unit tests reside in the `repository_test.go` file
+
+#### Integration tests
+
+Integration tests reside in the `integration_test.go` file. If there is need for more integration files per package we should prefix the file `repository_integration_test.go`.
+
+There are 2 option in order to mark the integration tests:
+
+##### Using a build tags
+
+Using a build tag `// +build integration` at the beginning of a file. This way when you call `go test ./...` only the unit tests are build and run. If you want to run the integration tests also you have to include the build tag `go test ./... -tags=integration`.
+
+- **[PRO]** Support for more test types like: end to end tests (e2e), contract testing etc
+- **[PRO]** The CLI is cleaner since the default `go test ./...` will run only unit tests and you have to opt in for other test types
+- **[CONS]** Since they are build tags the code is only build if you ask with the tags
+
+##### Using `testing.Short()` to mark unit tests
+
+Add to every test the `testing.Short()` at the beginning and use the `go test -short ./...` in order to run the unit tests.
+
+- **[PRO]** No need to add a tag to include in the build process
+- **[CONS]** Unit tests have to be tested using the `short` flag `go test -short ./...`
+- **[CONS]** No support for other test types, there are only unit tests and the rest.
+
+### CLI
+
+In order to run tests we can use the following commands:
+
+```bash
+go test ./...
+```
+
+which will test all packages recursively from where the command runs.
+
+In order to run the integration tests we just append the tag instruction to the above command:
+
+```bash
+go test ./... -tags=integration
+```
+
+Some helpful flags are the following:
+
+- `-race`, which enables the race detector
+- `-cover`, which reports the code coverage of each package
+- `-timeout`, which sets the timeout e.g. `-timeout=60s`
+
+Other flags can be found by running `go help test`.
+
+### Stubs, mocks, spies
+
+An excellent article on the differences is [Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html) by Martin Fowler.
+
+If we follow the small interface approach we can implement stubs by hand and don't need to use a package for that. Avoid adding dependencies.
+
+If there is really need for mocks, there are some packages out there tha can help. Check out the below mentioned useful packages.
+
+### Tests and sub-test
+
+Any function that follows the below convention is a test. Keep in mind that in `Xxx` the first letter is capital.
 
 ```go
-package main
+func TestXxx(*testing.T)
+```
 
-import (
-    "fmt"
-)
+Assume we have the following code:
 
-func main() {
-    fmt.Print("Hello World!")
+```go
+func division(a, b float64) (float64, error) {
+    if b == 0.0 {
+        return 0.0, errors.New("division by zero")
+    }
+    return a / b, nil
 }
 ```
 
-### Initialize
-
-```bash
-go mod init "github.com/taxibeat/test"
-```
-
-### go.mod
-
-```bash
-module github.com/taxibeat/test
-
-go 1.12
-```
-
-The above show the initial content of the `go.mod` file.
-At the top the module name and then the version of go it was created.
-At this point there are no dependencies.
-
-### Adding a module
-
-Let's add the following code in the `main.go` file:
+A simple test with standard assertion:
 
 ```go
-package main
-
-import (
-    "fmt"
-    "os"
-
-    "github.com/beatlabs/patron"
-)
-
-func main() {
-    err := patron.Setup("test", "1.0")
+func TestDivision1_StdAssertion(t *testing.T) {
+    res, err := division(3.0, 1.0)
     if err != nil {
-        fmt.Printf("failed to set up logging: %v\n", err)
-        os.Exit(1)
+        t.Errorf("division() returned an error %v where none was expected", err)
+    }
+    if res != 3.0 {
+        t.Errorf("division() = %v, want 3.0", res)
     }
 }
 ```
 
-In order to trigger the module installation you can call:
+I would urge you to use a testing package ([testify](https://github.com/stretchr/testify)) which makes the above code smaller and easier to read.
 
-```bash
-go mod tidy
+```go
+func TestDivision1(t *testing.T) {
+    res, err := division(3.0, 1.0)
+    assert.NoError(t, err)
+    assert.Equal(t, 3.0, res)
+}
 ```
 
-The result of the above action is the alteration of the `go.mod` file:
+A test with sub-tests:
 
-```bash
-module github.com/taxibeat/test
-
-go 1.12
-
-require github.com/beatlabs/patron v0.26.0
+```go
+func TestDivision2(t *testing.T) {
+    t.Run("success", func(t *testing.T) {
+        res, err := division(3.0, 1.0)
+        assert.NoError(t, err)
+        assert.Equal(t, 3.0, res)
+    })
+    t.Run("failure", func(t *testing.T) {
+        res, err := division(3.0, 0.0)
+        assert.EqualError(t, err, "division by zero")
+        assert.Equal(t, 0.0, res)
+    })
+}
 ```
 
-and the creation of the `go.sum` file which contains in more details the exact dependency graph along with version, if they exist, and some hashes.
+A table driven test:
 
-### Upgrading a module
-
-Let's assume that we want to update to the latest version:
-
-```bash
-go get github.com/beatlabs/patron
+```go
+func TestDivision3(t *testing.T) {
+    type args struct {
+        a float64
+        b float64
+    }
+    tests := map[string]struct {
+        args        args
+        want        float64
+        expectedErr string
+    }{
+        "success": {args: args{a: 3.0, b: 1.0}, want: 3.0},
+        "failure": {args: args{a: 3.0, b: 0.0}, expectedErr: "division by zero"},
+    }
+    for name, tt := range tests {
+        t.Run(name, func(t *testing.T) {
+            got, err := division(tt.args.a, tt.args.b)
+            if tt.expectedErr != "" {
+                assert.EqualError(t, err, tt.expectedErr)
+                assert.Equal(t, 0.0, got)
+            } else {
+                assert.NoError(t, err)
+                assert.Equal(t, tt.want, got)
+            }
+        })
+    }
+}
 ```
 
-will update to the latest minor version
+The args struct can be omitted for simple cases but provides a good separation of what if an input and what an output.
 
-You can even select the specific version with:
+In order to cover code paths there might be the need to check for specific errors in your tests. The code can handle this with the following 2 options:
 
-```bash
-go get github.com/beatlabs/patron@v0.25.0
+- Check the error string `err.Error()` for a expected error. Checking the error message might lead to brittle tests especially if you are not in control of the error message
+- Create custom error types and check for the specific error type
+
+Hint: there is a nice tool, part of the Visual Studio Code extension and in available also Goland, that writes the whole skeleton test which can be invoked with `Ctrl+Shift+P` and select "Go: Generate Unit Test For Function".
+
+**Prefer to write table-driven test since having one test for each test case will be hard to maintain.**
+
+### Sample data
+
+If for some reasons you need a fixture with data e.g. json you should create a folder inside the package folder named `testdata` and put the fixture in it. Then you can use the following code in your test to load that fixture:
+
+```go
+data, err := ioutil.ReadFile("testdata/abc.json")
 ```
 
-Every time go mod is changed we have to make sure that everything is synced by calling `go mod tidy` and `go mod vendor` to sync if vendoring is used.
+### Useful packages
 
-### Removing a module
+In order to make our life easier we can use some packages that help us to avoid writing repetitive code and make our tests more readable.
 
-In order to remove a module you have to:
+#### [testify](https://github.com/stretchr/testify)
 
-- Remove all relevant code first
-- Call `go mod tidy` which will handle the rest and `go mod vendor` to sync if vendoring is used.
+So instead of writing:
 
-### Tidy up
-
-It is always good to have the dependencies in a consistent state which can be accomplished with:
-
-```bash
-go mod tidy
+```go
+if age != 18 {
+    t.Errorf("Age = %d; want 18", age)
+}
 ```
 
-which adds missing and remove unused modules.
+we can write:
 
-### IDE Integration
-
-#### Visual Studio Code
-
-Go Modules support in Visual Studio Code is a bit limited, you can see known [issues and progress](https://github.com/Microsoft/vscode-go/wiki/Go-modules-support-in-Visual-Studio-Code).
-For now whenever you update a module make sure to restart Visual Studio Code so the language server will be restarted.
-
-#### GoLand
-
-Follow these steps to enable to Go Modules integration in GoLand:
-
-1. Open GoLand settings
-2. Go to Go -> Go Modules (vgo)
-3. Make sure "Enable Go Modules (vgo) integration" is checked
-
-### Vendoring
-
-```bash
-go mod vendor
+```go
+assert.Equalf(t, 18, age, "Age = %d; want 18", age)
 ```
 
-This command will create a vendor directory and put any dependency in it.
+we can also use require which calls explicitly `t.FailNow()` on failure.
 
-Vendoring has the following advantages:
+Testify contains also a mock package which can be used as a mocking framework.
 
-- go build can use vendor and thus do not need to go to the internet in order to fetch modules which speeds up the build process (CI/CD)
-- every module upgrade shows exactly what changes in the vendor code files
-- repeatable builds, as vendored files are part of the codebase
+## Code coverage and Visualization
 
-and the following disadvantages:
+If you are using VS Code or Goland you can actually see visually the code coverage and identify untested code paths.
 
-- Repository size will increase due to vendored files
-- Commits and reviews are getting bigger
-- Vendor has to be synced every time something changes
+For VS Code:
 
-### Other
+- Go to the top of the [test file](src/example_test.go)
+- Click on the `run package tests` link over the package instruction
+- Head to the code file and see the 100% coverage
 
-You can always make changes to the `go.mod` file by hand but you should then use `go mod tidy` and `go mod vendor` in order to sync your repo.
+## Benchmarks
 
-As a rule of thumb we should always, after a change in dependency, call:
+Any function that follows the pattern:
 
-- `go mod tidy`
-- `go mod vendor`, if we are vendoring
-
-To clean up the mod cache and force downloading dependencies again, call:
-
-- `go clean -cache`
-
-Check out [Resources - Further studying material](../resources/README.md).
-
-## Linting
-
-### [go vet](https://golang.org/cmd/vet/)
-
-This is a tool that comes bundled in with the go installation.
-
-### [lint](https://github.com/golang/lint)
-
-It is installed as part of the VS Code go extensions.
-
-### [golangci-lint](https://github.com/golangci/golangci-lint)
-
-This is a meta-linter, meaning that it uses various linters underneath and reports the problems in an unified format.
-
-[go vet](https://golang.org/cmd/vet/) and [golint](https://github.com/golang/lint) are included also.
-
-## [Makefile](src/Makefile)
-
-The included Makefile contains a lot collection of commands that are usually needed during development. When a sub-command is not provided the default one is `test`. Every command checks that the code is properly formatted with the help of the included script. The commands are:
-
-### test (fmtcheck will always run before this)
-
-```bash
-go test ./... -cover -race -timeout 60s
+```go
+func BenchmarkXxx(*testing.B)
 ```
 
-This command runs tests
+is considered a benchmark. There is no convention for the location of the benchmarks.
+Usually they are inside the unit test files.
 
-- in all packages
-- reports coverage
-- tests for race conditions
-- times out after 60 seconds
+An example of a benchmark is the following:
 
-### testint (fmtcheck will always run before this)
+```go
+var res float64
+var err error
 
-```bash
-go test ./... -race -cover -tags=integration -timeout 60s -count=1
+func BenchmarkDivision(b *testing.B) {
+
+    // Any initialization code comes here
+    var res1 float64
+    var err1 error
+
+    b.ReportAllocs()
+    b.ResetTimer()
+
+    for i := 0; i < b.N; i++ {
+        res1, err1 = division(3.0, 1.0)
+    }
+    res = res1
+    err = err1
+}
 ```
 
-This commands runs tests
+Some ground rules here:
 
-- in all packages
-- reports coverage
-- tests for race conditions
-- times out after 60 seconds
-- includes all files with `integration` build tag
-- by providing the count we bust the test cache so the tests will not cached
+- In order to avoid compiler optimizations(inlining) the results of the division function are assigned to package level variable
+- The `b.ReportAllocs()` enables allocation reporting which should be used by default
+- The `b.ResetTimer()` can be used in order to start the timer after the reset. This way we can initialize any data we want without compromising the benchmark results
+- The value of `b.N` will increase each time until the benchmark runner is satisfied with the stability of the benchmark.
+- Sub and table driven benchmark are supported in the same way as the tests
 
-### cover (fmtcheck will always run before this)
-
-```bash
-go test ./... -coverpkg=./... -coverprofile=cover.out -tags=integration -covermode=atomic && \
-go tool cover -func=cover.out && \
-rm cover.out
-```
-
-This multi-command report the code coverage including files with the `integration` build tag.
-
-### fmt (fmtcheck will always run before this)
+In order to run the benchmark execute the following command:
 
 ```bash
-go fmt ./...
+go test -bench=Benchmark_division
 ```
 
-The command formats the code in all packages.
-
-### fmtcheck
+The output of a run is the following:
 
 ```bash
-@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
+goos: linux
+goarch: amd64
+pkg: examples
+Benchmark_division-16           2000000000               0.74 ns/op            0 B/op          0 allocs/op
+PASS
+ok      examples        1.565s
 ```
 
-The command executes a format check and exits with error if the
+where:
 
-### lint (fmtcheck will always run before this)
+- `Benchmark_division-16` is the number of the benchmark along with a number that indicates how many cores the benchmark has used, in this case 16 cores
+- 2000000000 is the number `b.N`
 
-```bash
-golangci-lint run -E golint --exclude-use-default=false --build-tags integration
-```
+## Exercises
 
-We are using the `golangci-lint` meta-linter with enabled `golint` including files with the `integration` build tag.
+Create a new project and implement a method that calculates the [haversine distance](https://en.wikipedia.org/wiki/Haversine_formula) between two points Lat, Lng.
+A point consists of a Longitude and Latitude.
 
-### deeplint (fmtcheck will always run before this)
+### Write a table-driven test
 
-```bash
-golangci-lint run --enable-all --exclude-use-default=false -D dupl --build-tags integration
-```
+Test the Distance of the following city pairs:
 
-We are using the `golangci-lint` meta-linter with all linters enabled, except the `dupl` linter, including files with the `integration` build tag.
+Athens - Amsterdam
+Amsterdam - Berlin
+Berlin - Athens
 
-### ci
+Where (Lat/Lng):
 
-The command is used in our CI pipeline and calls the following commands:
+- Athens: 37.983972, 23.727806
+- Amsterdam: 52.366667, 4.9
+- Berlin: 52.516667, 13.388889
 
-- fmtcheck
-- lint
-- testint
+### Write a Benchmark
 
-### modsync (fmtcheck will always run before this)
-
-```bash
-go mod tidy && \
-go mod vendor
-```
-
-The command uses the go modules to do the following:
-
-- using `go mod tidy` to check and update the all modules. (see module section)
-- vendor all modules
-
-## [Dockerization](src/Dockerfile)
-
-The included [Dockerfile](src/Dockerfile) is an example of how to create a container.
-It uses a multistage build approach where in the first stage:
-
-- copies everything to the container
-- set's default version, which can be overridden by the docker CLI in order to inject the version
-- build using vendor and overrides the version variable in the main package, thus injecting the aforementioned version
-
-and the second stage:
-
-- uses `scratch` as the base container (for more advanced scenarios you might go for alpine)
-- copies only the executable from the builder stage
+We should benchmark the performance of this function with Athens and Amsterdam as input.
 
 [-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 6**](../chapter6/README.md)  
 [<- Previous&nbsp;: **Chapter 4**](../chapter4/README.md)

@@ -1,7 +1,5 @@
 # Chapter 2 - The looks
 
-Chapter 2 - The looks
-
 ## Visibility
 
 Go has a simple model for access control on function, methods, fields, etc.

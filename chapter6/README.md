@@ -1,100 +1,288 @@
-# Chapter 6 - OSS @ Beat
+# Chapter 6 - Dependency Management and Tools
 
-## [Patron](https://github.com/beatlabs/patron)
+## Go Modules
 
-Patron is a microservice framework.
+In order to demonstrate go modules we will create a new folder `test` and place a `main.go` file in it with the following content:
 
-### Setting up
+```go
+package main
 
-There is a docker compose file present in order to spin up everything needed.
+import (
+    "fmt"
+)
 
-```bash
-docker-compose up -d
+func main() {
+    fmt.Print("Hello World!")
+}
 ```
 
-### First example
-
-The first example is the entry point of the demonstration:
-
-- Receives a HTTP POST with a JSON payload
-- Sends the same payload in protobuf format to the second service
-
-### Second example
-
-- Receives a HTTP POST with a protobuf payload
-- Sends the same payload in JSON format to a Kafka topic
-
-### Third example
-
-- Receives a JSON message from Kafka
-- Sends the same payload in JSON format to a RabbitMQ
-
-### Fourth example
-
-- Receives a JSON message from RabbitMQ
-- Sends the same payload in JSON format to AWS SNS which is connected to a SQS
-
-### Fifth example
-
-- Receives a JSON message from AWS SQS
-- Logs the payload to console
-
-### Try out
-
-Send a request to the first service:
+### Initialize
 
 ```bash
-curl -d '{"Firstname":"John", "Lastname": "Doe"}' -H "Content-Type: application/json" -X POST http://localhost:50000
+go mod init "github.com/taxibeat/test"
 ```
 
-Watch the logging of each service and after that head over to [jaeger](http://localhost:16686/search) and [prometheus](http://localhost:9090/graph).
-
-### CLI
-
-The framework supplies a cli in order to simplify repository generation with the following features:
-
-- git repository creation
-- cmd folder and main.go creation with build version support
+### go.mod
 
 ```bash
-go build -ldflags '-X main.version=1.0.0' main.go)
+module github.com/taxibeat/test
+
+go 1.12
 ```
 
-- go module support and vendoring
-- Dockerfile with version support (docker build --build-arg version=1.0.0)
-- The latest version can be installed with
+The above show the initial content of the `go.mod` file.
+At the top the module name and then the version of go it was created.
+At this point there are no dependencies.
+
+### Adding a module
+
+Let's add the following code in the `main.go` file:
+
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+
+    "github.com/beatlabs/patron"
+)
+
+func main() {
+    err := patron.Setup("test", "1.0")
+    if err != nil {
+        fmt.Printf("failed to set up logging: %v\n", err)
+        os.Exit(1)
+    }
+}
+```
+
+In order to trigger the module installation you can call:
 
 ```bash
-go get github.com/beatlabs/patron/cmd/patron
+go mod tidy
 ```
 
-The below is an example of a service created with the cli that has a module name github.com/beatlabs/test and will be created in the test folder in the current directory.
+The result of the above action is the alteration of the `go.mod` file:
 
 ```bash
-patron -m "github.com/beatlabs/test" -p "test"
+module github.com/taxibeat/test
+
+go 1.12
+
+require github.com/beatlabs/patron v0.26.0
 ```
 
-## [Harvester](https://github.com/beatlabs/harvester)
+and the creation of the `go.sum` file which contains in more details the exact dependency graph along with version, if they exist, and some hashes.
 
-`Harvester` is a configuration library which helps setting up and monitoring configuration values in order to dynamically reconfigure your application.
+### Upgrading a module
 
-`Harvester` is part of a bigger ecosystem which consists of:
+Let's assume that we want to update to the latest version:
 
-- A backend for handling the configurations
-- A portal for giving access to user to change configuration
-- Consul, as a distributed KV store
-- A service that monitors Kubernetes for new deployments in order to update the available configuration from the newly deployed service.
+```bash
+go get github.com/beatlabs/patron
+```
 
-Any service that wants to participate in the above ecosystem has to provide a endpoint which exposes the available configuration options.
+will update to the latest minor version
 
-`Harvester` is used in the final services to help managing and updating configuration.
+You can even select the specific version with:
 
-Configuration can be obtained from the following sources:
+```bash
+go get github.com/beatlabs/patron@v0.25.0
+```
 
-- Seed values, are hard-coded values into your configuration struct
-- Environment values, are obtained from the environment
-- Flag values, are obtained from CLI flags with the form -flag=value
-- Consul, which is used to get initial values and to monitor them for changes
+Every time go mod is changed we have to make sure that everything is synced by calling `go mod tidy` and `go mod vendor` to sync if vendoring is used.
+
+### Removing a module
+
+In order to remove a module you have to:
+
+- Remove all relevant code first
+- Call `go mod tidy` which will handle the rest and `go mod vendor` to sync if vendoring is used.
+
+### Tidy up
+
+It is always good to have the dependencies in a consistent state which can be accomplished with:
+
+```bash
+go mod tidy
+```
+
+which adds missing and remove unused modules.
+
+### IDE Integration
+
+#### Visual Studio Code
+
+Go Modules support in Visual Studio Code is a bit limited, you can see known [issues and progress](https://github.com/Microsoft/vscode-go/wiki/Go-modules-support-in-Visual-Studio-Code).
+For now whenever you update a module make sure to restart Visual Studio Code so the language server will be restarted.
+
+#### GoLand
+
+Follow these steps to enable to Go Modules integration in GoLand:
+
+1. Open GoLand settings
+2. Go to Go -> Go Modules (vgo)
+3. Make sure "Enable Go Modules (vgo) integration" is checked
+
+### Vendoring
+
+```bash
+go mod vendor
+```
+
+This command will create a vendor directory and put any dependency in it.
+
+Vendoring has the following advantages:
+
+- go build can use vendor and thus do not need to go to the internet in order to fetch modules which speeds up the build process (CI/CD)
+- every module upgrade shows exactly what changes in the vendor code files
+- repeatable builds, as vendored files are part of the codebase
+
+and the following disadvantages:
+
+- Repository size will increase due to vendored files
+- Commits and reviews are getting bigger
+- Vendor has to be synced every time something changes
+
+### Other
+
+You can always make changes to the `go.mod` file by hand but you should then use `go mod tidy` and `go mod vendor` in order to sync your repo.
+
+As a rule of thumb we should always, after a change in dependency, call:
+
+- `go mod tidy`
+- `go mod vendor`, if we are vendoring
+
+To clean up the mod cache and force downloading dependencies again, call:
+
+- `go clean -cache`
+
+Check out [Resources - Further studying material](../resources/README.md).
+
+## Linting
+
+### [go vet](https://golang.org/cmd/vet/)
+
+This is a tool that comes bundled in with the go installation.
+
+### [lint](https://github.com/golang/lint)
+
+It is installed as part of the VS Code go extensions.
+
+### [golangci-lint](https://github.com/golangci/golangci-lint)
+
+This is a meta-linter, meaning that it uses various linters underneath and reports the problems in an unified format.
+
+[go vet](https://golang.org/cmd/vet/) and [golint](https://github.com/golang/lint) are included also.
+
+## [Makefile](src/Makefile)
+
+The included Makefile contains a lot collection of commands that are usually needed during development. When a sub-command is not provided the default one is `test`. Every command checks that the code is properly formatted with the help of the included script. The commands are:
+
+### test (fmtcheck will always run before this)
+
+```bash
+go test ./... -cover -race -timeout 60s
+```
+
+This command runs tests
+
+- in all packages
+- reports coverage
+- tests for race conditions
+- times out after 60 seconds
+
+### testint (fmtcheck will always run before this)
+
+```bash
+go test ./... -race -cover -tags=integration -timeout 60s -count=1
+```
+
+This commands runs tests
+
+- in all packages
+- reports coverage
+- tests for race conditions
+- times out after 60 seconds
+- includes all files with `integration` build tag
+- by providing the count we bust the test cache so the tests will not cached
+
+### cover (fmtcheck will always run before this)
+
+```bash
+go test ./... -coverpkg=./... -coverprofile=cover.out -tags=integration -covermode=atomic && \
+go tool cover -func=cover.out && \
+rm cover.out
+```
+
+This multi-command report the code coverage including files with the `integration` build tag.
+
+### fmt (fmtcheck will always run before this)
+
+```bash
+go fmt ./...
+```
+
+The command formats the code in all packages.
+
+### fmtcheck
+
+```bash
+@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
+```
+
+The command executes a format check and exits with error if the
+
+### lint (fmtcheck will always run before this)
+
+```bash
+golangci-lint run -E golint --exclude-use-default=false --build-tags integration
+```
+
+We are using the `golangci-lint` meta-linter with enabled `golint` including files with the `integration` build tag.
+
+### deeplint (fmtcheck will always run before this)
+
+```bash
+golangci-lint run --enable-all --exclude-use-default=false -D dupl --build-tags integration
+```
+
+We are using the `golangci-lint` meta-linter with all linters enabled, except the `dupl` linter, including files with the `integration` build tag.
+
+### ci
+
+The command is used in our CI pipeline and calls the following commands:
+
+- fmtcheck
+- lint
+- testint
+
+### modsync (fmtcheck will always run before this)
+
+```bash
+go mod tidy && \
+go mod vendor
+```
+
+The command uses the go modules to do the following:
+
+- using `go mod tidy` to check and update the all modules. (see module section)
+- vendor all modules
+
+## [Dockerization](src/Dockerfile)
+
+The included [Dockerfile](src/Dockerfile) is an example of how to create a container.
+It uses a multistage build approach where in the first stage:
+
+- copies everything to the container
+- set's default version, which can be overridden by the docker CLI in order to inject the version
+- build using vendor and overrides the version variable in the main package, thus injecting the aforementioned version
+
+and the second stage:
+
+- uses `scratch` as the base container (for more advanced scenarios you might go for alpine)
+- copies only the executable from the builder stage
 
 [-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 7**](../chapter7/README.md)  
 [<- Previous&nbsp;: **Chapter 5**](../chapter5/README.md)

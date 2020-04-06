@@ -1,300 +1,570 @@
-# Chapter 4 - Tests and Benchmarks
+# Chapter 4 - Concurrency
 
-## Testing
+## [Concurrency is not parallelism](http://www.youtube.com/embed/cN_DpYBzKso)
 
-### Test file location
+**Concurrency is about dealing with lots of things at once.**
 
-By convention the test files are collocated with the actual code files.
-We have the following convention for test file naming, given that the name of the file which contains the code to be tested is `repository.go`:
+**Parallelism is about doing lots of things at once.**
 
-#### Unit tests
+## Green threads
 
-Unit tests reside in the `repository_test.go` file
+In computer programming, green threads are threads that are scheduled by a runtime library or virtual machine (VM) instead of natively by the underlying operating system. Green threads emulate multi-threaded environments without relying on any native OS capabilities, and they are managed in user space instead of kernel space, enabling them to work in environments that do not have native thread support ([wiki](https://en.wikipedia.org/wiki/Green_threads)).
 
-#### Integration tests
+Some example languages are:
 
-Integration tests reside in the `integration_test.go` file. If there is need for more integration files per package we should prefix the file `repository_integration_test.go`.
+- .NET Framework's [TPL](https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-based-asynchronous-programming)
+- Erlang (Processes, Actors)
+- Haskell's coroutines
+- Go's goroutines
 
-There are 2 option in order to mark the integration tests:
+## Goroutines
 
-##### Using a build tags
-
-Using a build tag `// +build integration` at the beginning of a file. This way when you call `go test ./...` only the unit tests are build and run. If you want to run the integration tests also you have to include the build tag `go test ./... -tags=integration`.
-
-- **[PRO]** Support for more test types like: end to end tests (e2e), contract testing etc
-- **[PRO]** The CLI is cleaner since the default `go test ./...` will run only unit tests and you have to opt in for other test types
-- **[CONS]** Since they are build tags the code is only build if you ask with the tags
-
-##### Using `testing.Short()` to mark unit tests
-
-Add to every test the `testing.Short()` at the beginning and use the `go test -short ./...` in order to run the unit tests.
-
-- **[PRO]** No need to add a tag to include in the build process
-- **[CONS]** Unit tests have to be tested using the `short` flag `go test -short ./...`
-- **[CONS]** No support for other test types, there are only unit tests and the rest.
-
-### CLI
-
-In order to run tests we can use the following commands:
-
-```bash
-go test ./...
-```
-
-which will test all packages recursively from where the command runs.
-
-In order to run the integration tests we just append the tag instruction to the above command:
-
-```bash
-go test ./... -tags=integration
-```
-
-Some helpful flags are the following:
-
-- `-race`, which enables the race detector
-- `-cover`, which reports the code coverage of each package
-- `-timeout`, which sets the timeout e.g. `-timeout=60s`
-
-Other flags can be found by running `go help test`.
-
-### Stubs, mocks, spies
-
-An excellent article on the differences is [Mocks Aren't Stubs](https://martinfowler.com/articles/mocksArentStubs.html) by Martin Fowler.
-
-If we follow the small interface approach we can implement stubs by hand and don't need to use a package for that. Avoid adding dependencies.
-
-If there is really need for mocks, there are some packages out there tha can help. Check out the below mentioned useful packages.
-
-### Tests and sub-test
-
-Any function that follows the below convention is a test. Keep in mind that in `Xxx` the first letter is capital.
+- no thread pool
+- small stack compared to other implementations (4kB instead of 1-8MB) which makes them cheap to create
+- if a goroutine blocks (network, sleeping, channels, sync...) another will be scheduled instead
 
 ```go
-func TestXxx(*testing.T)
+go func(a int){
+    ...
+}(1)
 ```
 
-Assume we have the following code:
+## Channels
+
+Inspired from Hoare's Communicating Sequential Processes, or CSP.
+
+Channels are the pipes that connect concurrent goroutines.
+You can send values into channels from one goroutine and receive those values into another goroutine.
+
+- unbuffered
 
 ```go
-func division(a, b float64) (float64, error) {
-    if b == 0.0 {
-        return 0.0, errors.New("division by zero")
-    }
-    return a / b, nil
+ch := make(chan string)
+```
+
+- buffered
+
+```go
+ch := make(chan string, 10)
+```
+
+Both block eventually if no consumer is hooked.
+
+When using channels as arguments in function and methods we can specify if we:
+
+- receive data only
+
+```go
+func test(ch <-chan string)
+```
+
+- send data only
+
+```go
+func test(ch chan<- string)
+```
+
+- both
+
+```go
+func test(ch chan string)
+```
+
+The code is checked compile time!
+
+Channels are about signaling!
+
+### Channel State
+
+- nil
+
+```go
+var ch chan string
+or
+ch = nil
+```
+
+- open
+
+```go
+ch := make(chan string)
+```
+
+- close
+
+```go
+close(ch)
+```
+
+![State]( img/state.png "State")
+
+### Guarantee Of Delivery
+
+![Guarantee of delivery]( img/guarantee_of_delivery.png "Guarantee of delivery")
+
+### Signaling With Data
+
+![Signaling with data]( img/signaling_with_data.png "Signaling with data")
+
+- Guarantee
+
+    An unbuffered channel gives you a guarantee that a signal being sent has been received,
+    because the receive of the signal happens before the send of the signal completes.
+
+- No Guarantee
+
+    A buffered channel of size >1 gives you No guarantee that a signal being sent has been received,
+    because the send of the signal happens before the receive of the signal completes.
+
+- Delayed Guarantee
+
+    A buffered channel of size =1 gives you a delayed guarantee.
+    It can guarantee that the previous signal that was sent has been received,
+    because the receive of the first signal, happens before the send of the second signal completes.
+
+### Signaling Without Data
+
+![Signaling without data]( img/signaling_without_data.png "Signaling without data")
+
+### Send
+
+- send with data
+
+```go
+ch := make(chan string)
+ch <- "test"
+```
+
+### Send without data
+
+```go
+ch := make(chan struct{})
+ch <- struct{}{}
+```
+
+Hint: **It is the zero-space, idiomatic way to indicate a channel used only for signalling**
+
+### Receive
+
+```go
+ch := make(chan int)
+close(ch)
+val, ok := <-ch
+fmt.Printf("val: %d ok: %t\n", val, ok)
+```
+
+ok is false if the channel is closed and val's value is the default for the type
+
+- for range loop
+
+```go
+for val := range ch {
+    fmt.Print(val)
 }
 ```
 
-A simple test with standard assertion:
+for exits if the channel is closed
+
+- select (multiple channels)
 
 ```go
-func TestDivision1_StdAssertion(t *testing.T) {
-    res, err := division(3.0, 1.0)
+select {
+    case <-ctx.Done():
+    ...
+    case val, ok := <-ch:
+    ...
+}
+```
+
+ok is false if the channel is closed
+
+- deadlock
+
+```go
+ch := make(chan int)
+val, ok := <-ch
+fmt.Printf("val: %d ok: %t\n", val, ok)
+```
+
+### Examples
+
+- Send data to goroutine, wait for goroutine to complete (channel3.go)
+
+```go
+ch := make(chan string)
+
+go func() {
+    fmt.Print(<-ch)
+    close(ch)
+}()
+
+ch <- "Hello"
+<-ch
+fmt.Print(", World!\n")
+```
+
+- Loop and close (channel4.go)
+
+```go
+ch := make(chan string, 4)
+chSig := make(chan struct{})
+
+go func() {
+    for val := range ch {
+        fmt.Print(val)
+    }
+    chSig <- struct{}{}
+}()
+
+for i := 1; i < 4; i++ {
+    ch <- fmt.Sprintf("%d,", i)
+}
+close(ch)
+<-chSig
+fmt.Print(" Boom!\n")
+```
+
+## Context package
+
+Package context defines the Context type, which carries deadlines, cancellation signals, and other request-scoped values across API boundaries and between processes.
+
+Context can form a tree of contexts every time we use one of the next functions.
+
+- WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+
+```go
+childCtx, cnl := context.WithCancel(ctx)
+...
+cnl()
+```
+
+- WithDeadline(parent Context, d time.Time) (Context, CancelFunc)
+
+```go
+childCtx, cnl := context.WithDeadline(ctx, d)
+
+...
+
+cnl() // or the deadline passed
+```
+
+- WithTimeout(parent Context, timeout time.Duration)
+
+```go
+childCtx, cnl := context.WithTimeout(ctx, 1 * time.Second)
+
+...
+
+cnl() // or timeout passed
+```
+
+- func WithValue(parent Context, key, val interface{}) Context
+
+Use context Values only for request-scoped data that transits processes and APIs, not for passing optional parameters to functions.
+
+```go
+type favContextKey string
+
+f := func(ctx context.Context, k favContextKey) {
+    if v := ctx.Value(k); v != nil {
+        fmt.Println("found value:", v)
+        return
+    }
+    fmt.Println("key not found:", k)
+}
+
+k := favContextKey("language")
+ctx := context.WithValue(context.Background(), k, "Go")
+
+f(ctx, k)
+f(ctx, favContextKey("color"))
+```
+
+Which prints out:
+
+```bash
+found value: Go
+key not found: color
+```
+
+**The convention is that every function or method that need to use or propagate context has it as its first argument:**
+
+```go
+func test(ctx context.Context, name string)
+```
+
+### Cancel a worker example
+
+- Setup
+
+```go
+chDone := make(chan struct{})
+ch := make(chan int, 1000)
+ctx, cnl := context.WithCancel(context.Background())
+```
+
+- Producer
+
+```go
+go func() {
+    i := 0
+    for {
+        if ctx.Err() != nil {
+            fmt.Print("Producer Done\n")
+            chDone <- struct{}{}
+            return
+        }
+        ch <- i
+        i++
+        time.Sleep(100 * time.Millisecond)
+    }
+}()
+```
+
+- Consumer
+
+```go
+go func() {
+    for {
+        select {
+        case <-ctx.Done():
+            fmt.Print("Writer Done\n")
+            chDone <- struct{}{}
+            return
+        case n := <-ch:
+            fmt.Printf("%d\n", n)
+        }
+    }
+}()
+```
+
+- Sync
+
+```go
+time.Sleep(10 * time.Second)
+cnl()
+<-chDone
+<-chDone
+```
+
+Take a look at the [full example.](src/context1.go)
+
+## Sync package
+
+Package sync provides basic synchronization primitives such as mutual exclusion locks.
+Other than the Once and WaitGroup types, most are intended for use by low-level library routines.
+Higher-level synchronization is better done via channels and communication.
+
+### [WaitGroup](src/sync1/main.go)
+
+A WaitGroup waits for a collection of goroutines to finish.
+The main goroutine calls Add to set the number of goroutines to wait for.
+Then each of the goroutines runs and calls Done when finished.
+At the same time, Wait can be used to block until all goroutines have finished.
+
+```go
+wg := sync.WaitGroup{}
+for i := 0; i < 5; i++ {
+    wg.Add(1)
+    go func(i int) {
+        defer wg.Done()
+        fmt.Printf("%d\n", i)
+        time.Sleep(1 * time.Second)
+    }(i)
+}
+wg.Wait()
+```
+
+- Mutex
+
+Mutual exclusion lock.
+Channels internally work with mutexes.
+
+```go
+type sum struct {
+    sync.Mutex
+    sum int
+}
+
+func (s *sum) add(i int) {
+    s.Lock()
+    defer s.Unlock()
+    s.sum = s.sum + 1
+}
+
+func main() {
+    wg := sync.WaitGroup{}
+    s := sum{}
+    for i := 0; i < 5; i++ {
+        wg.Add(1)
+        go func(i int) {
+            defer wg.Done()
+            s.add(i)
+        }(i)
+    }
+    wg.Wait()
+    fmt.Printf("Sum: %d\n", s.sum)
+}
+```
+
+Check out the [full example](src/sync2/main.go).
+
+- RWMutex
+
+Same as Mutex. Readers don't block each other but one writer blocks all (readers and writers).
+
+## Concurrency patterns
+
+### Pipeline
+
+Setting up a 3 stage pipeline
+
+- generate numbers
+
+```go
+func gen(ch chan<- int) {
+    for i := 1; i <= 10; i++ {
+        ch <- i
+    }
+    close(ch)
+}
+```
+
+- square numbers
+
+```go
+func sq(ch <-chan int, chRes chan<- int) {
+    for v := range ch {
+        chRes <- v * v
+    }
+    close(chRes)
+}
+```
+
+- print numbers (inside the main) (pattern1.go)
+
+```go
+numbers := make(chan int, 10)
+results := make(chan int, 10)
+go gen(numbers)
+go sq(numbers, results)
+
+for result := range results {
+    fmt.Printf("Result: %d\n", result)
+}
+```
+
+Take a look at the [full example](src/pattern1/main.go).
+
+### Fan Out/In
+
+![Fan out/in](img/fanoutin.png "Fan out/in")
+
+- Work distributing
+
+- Distribute work
+
+```go
+func distr(ch <-chan int, chRes chan<- int) {
+    wg := sync.WaitGroup{}
+    for v := range ch {
+        wg.Add(1)
+        go func(v int) {
+            defer wg.Done()
+            sq1(v, chRes)
+        }(v)
+    }
+    wg.Wait()
+    close(chRes)
+}
+```
+
+- main (pattern2.go)
+
+```go
+numbers := make(chan int, 10)
+results := make(chan int, 10)
+go gen1(numbers)
+go distr(numbers, results)
+for result := range results {
+    fmt.Printf("Result: %d\n", result)
+}
+```
+
+Take a look at the [full example](src/pattern2/main.go).
+
+- Work stealing
+
+- spin up workers
+
+```go
+func workers(ch <-chan int, chRes chan<- int) {
+    wg := sync.WaitGroup{}
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go func() {
+            defer wg.Done()
+            sq2(ch, chRes)
+        }()
+    }
+    wg.Wait()
+    close(chRes)
+}
+```
+
+- main
+
+```go
+numbers := make(chan int, 10)
+results := make(chan int, 10)
+go workers(numbers, results)
+go gen2(numbers)
+for result := range results {
+    fmt.Printf("Result: %d\n", result)
+}
+```
+
+Take a look at the [full example](src/pattern3/main.go).
+
+## Error handling
+
+- exit application
+
+```go
+go func() {
+    ...
     if err != nil {
-        t.Errorf("division() returned an error %v where none was expected", err)
+        log.Fatalf("error: %v",err)
     }
-    if res != 3.0 {
-        t.Errorf("division() = %v, want 3.0", res)
+}()
+```
+
+- using error channel
+
+```go
+go func() {
+    ...
+    if err != nil {
+        chErr <- err
     }
-}
+}()
 ```
 
-I would urge you to use a testing package ([testify](https://github.com/stretchr/testify)) which makes the above code smaller and easier to read.
+- using result struct with error
 
 ```go
-func TestDivision1(t *testing.T) {
-    res, err := division(3.0, 1.0)
-    assert.NoError(t, err)
-    assert.Equal(t, 3.0, res)
+type Result struct {
+    Err error
+    Amount float
 }
-```
 
-A test with sub-tests:
-
-```go
-func TestDivision2(t *testing.T) {
-    t.Run("success", func(t *testing.T) {
-        res, err := division(3.0, 1.0)
-        assert.NoError(t, err)
-        assert.Equal(t, 3.0, res)
-    })
-    t.Run("failure", func(t *testing.T) {
-        res, err := division(3.0, 0.0)
-        assert.EqualError(t, err, "division by zero")
-        assert.Equal(t, 0.0, res)
-    })
-}
-```
-
-A table driven test:
-
-```go
-func TestDivision3(t *testing.T) {
-    type args struct {
-        a float64
-        b float64
+go func() {
+    ...
+    if err != nil {
+        chRes <- Result{err:err}
     }
-    tests := map[string]struct {
-        args        args
-        want        float64
-        expectedErr string
-    }{
-        "success": {args: args{a: 3.0, b: 1.0}, want: 3.0},
-        "failure": {args: args{a: 3.0, b: 0.0}, expectedErr: "division by zero"},
-    }
-    for name, tt := range tests {
-        t.Run(name, func(t *testing.T) {
-            got, err := division(tt.args.a, tt.args.b)
-            if tt.expectedErr != "" {
-                assert.EqualError(t, err, tt.expectedErr)
-                assert.Equal(t, 0.0, got)
-            } else {
-                assert.NoError(t, err)
-                assert.Equal(t, tt.want, got)
-            }
-        })
-    }
-}
+}()
 ```
-
-The args struct can be omitted for simple cases but provides a good separation of what if an input and what an output.
-
-In order to cover code paths there might be the need to check for specific errors in your tests. The code can handle this with the following 2 options:
-
-- Check the error string `err.Error()` for a expected error. Checking the error message might lead to brittle tests especially if you are not in control of the error message
-- Create custom error types and check for the specific error type
-
-Hint: there is a nice tool, part of the Visual Studio Code extension and in available also Goland, that writes the whole skeleton test which can be invoked with `Ctrl+Shift+P` and select "Go: Generate Unit Test For Function".
-
-**Prefer to write table-driven test since having one test for each test case will be hard to maintain.**
-
-### Sample data
-
-If for some reasons you need a fixture with data e.g. json you should create a folder inside the package folder named `testdata` and put the fixture in it. Then you can use the following code in your test to load that fixture:
-
-```go
-data, err := ioutil.ReadFile("testdata/abc.json")
-```
-
-### Useful packages
-
-In order to make our life easier we can use some packages that help us to avoid writing repetitive code and make our tests more readable.
-
-#### [testify](https://github.com/stretchr/testify)
-
-So instead of writing:
-
-```go
-if age != 18 {
-    t.Errorf("Age = %d; want 18", age)
-}
-```
-
-we can write:
-
-```go
-assert.Equalf(t, 18, age, "Age = %d; want 18", age)
-```
-
-we can also use require which calls explicitly `t.FailNow()` on failure.
-
-Testify contains also a mock package which can be used as a mocking framework.
-
-## Code coverage and Visualization
-
-If you are using VS Code or Goland you can actually see visually the code coverage and identify untested code paths.
-
-For VS Code:
-
-- Go to the top of the [test file](src/example_test.go)
-- Click on the `run package tests` link over the package instruction
-- Head to the code file and see the 100% coverage
-
-## Benchmarks
-
-Any function that follows the pattern:
-
-```go
-func BenchmarkXxx(*testing.B)
-```
-
-is considered a benchmark. There is no convention for the location of the benchmarks.
-Usually they are inside the unit test files.
-
-An example of a benchmark is the following:
-
-```go
-var res float64
-var err error
-
-func BenchmarkDivision(b *testing.B) {
-
-    // Any initialization code comes here
-    var res1 float64
-    var err1 error
-
-    b.ReportAllocs()
-    b.ResetTimer()
-
-    for i := 0; i < b.N; i++ {
-        res1, err1 = division(3.0, 1.0)
-    }
-    res = res1
-    err = err1
-}
-```
-
-Some ground rules here:
-
-- In order to avoid compiler optimizations(inlining) the results of the division function are assigned to package level variable
-- The `b.ReportAllocs()` enables allocation reporting which should be used by default
-- The `b.ResetTimer()` can be used in order to start the timer after the reset. This way we can initialize any data we want without compromising the benchmark results
-- The value of `b.N` will increase each time until the benchmark runner is satisfied with the stability of the benchmark.
-- Sub and table driven benchmark are supported in the same way as the tests
-
-In order to run the benchmark execute the following command:
-
-```bash
-go test -bench=Benchmark_division
-```
-
-The output of a run is the following:
-
-```bash
-goos: linux
-goarch: amd64
-pkg: examples
-Benchmark_division-16           2000000000               0.74 ns/op            0 B/op          0 allocs/op
-PASS
-ok      examples        1.565s
-```
-
-where:
-
-- `Benchmark_division-16` is the number of the benchmark along with a number that indicates how many cores the benchmark has used, in this case 16 cores
-- 2000000000 is the number `b.N`
-
-## Exercises
-
-Create a new project and implement a method that calculates the [haversine distance](https://en.wikipedia.org/wiki/Haversine_formula) between two points Lat, Lng.
-A point consists of a Longitude and Latitude.
-
-### Write a table-driven test
-
-Test the Distance of the following city pairs:
-
-Athens - Amsterdam
-Amsterdam - Berlin
-Berlin - Athens
-
-Where (Lat/Lng):
-
-- Athens: 37.983972, 23.727806
-- Amsterdam: 52.366667, 4.9
-- Berlin: 52.516667, 13.388889
-
-### Write a Benchmark
-
-We should benchmark the performance of this function with Athens and Amsterdam as input.
 
 [-> Next&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: **Chapter 5**](../chapter5/README.md)  
 [<- Previous&nbsp;: **Chapter 3**](../chapter3/README.md)

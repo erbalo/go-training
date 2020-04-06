@@ -77,4 +77,4 @@ Unfortunately there is no standard recommendation for the layout but some of the
 - [ardanlabs/gotraining](https://github.com/ardanlabs/gotraining/blob/master/reading/README.md)
 - [SOLID Go Design](https://www.youtube.com/watch?v=zzAdEt3xZ1M)
 
-[<- Previous&nbsp;: **Chapter 7**](../chapter7/README.md)
+[<- Previous&nbsp;: **Chapter 8**](../chapter8/README.md)
