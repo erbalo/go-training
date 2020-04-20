@@ -347,7 +347,7 @@ cnl()
 <-chDone
 ```
 
-Take a look at the [full example.](src/context1.go)
+Take a look at the [full example.](src/context/main.go)
 
 ## Sync package
 
