@@ -127,6 +127,7 @@ As you might see the list is big and we need to organize them a lot better in or
 We might organize our projects following the below structure (project named `myservice`):
 
 - [myservice](#root-myservice)
+  - [api [OPT]](#api)
   - [cmd [OPT]](#cmd)
   - [config [OPT]](#config)
   - [internal [OPT]](#internal)
@@ -166,6 +167,10 @@ Conventions here are the following:
 ### root (myservice)
 
 The following files are contained, along with the other folders:
+
+### api
+
+OpenAPI/Swagger specs, JSON schema files, protocol definition files.
 
 ### cmd
 
