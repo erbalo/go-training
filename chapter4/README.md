@@ -512,7 +512,7 @@ func workers(ch <-chan int, chRes chan<- int) {
 }
 ```
 
-- main
+- main (pattern3.go)
 
 ```go
 numbers := make(chan int, 10)

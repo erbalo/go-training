@@ -156,11 +156,11 @@ func TestDivision3(t *testing.T) {
 }
 ```
 
-The args struct can be omitted for simple cases but provides a good separation of what if an input and what an output.
+The args struct can be omitted for simple cases but provides a good separation of what is an input and what an output.
 
 In order to cover code paths there might be the need to check for specific errors in your tests. The code can handle this with the following 2 options:
 
-- Check the error string `err.Error()` for a expected error. Checking the error message might lead to brittle tests especially if you are not in control of the error message
+- Check the error string `err.Error()` for an expected error. Checking the error message might lead to brittle tests especially if you are not in control of the error message
 - Create custom error types and check for the specific error type
 
 Hint: there is a nice tool, part of the Visual Studio Code extension and in available also Goland, that writes the whole skeleton test which can be invoked with `Ctrl+Shift+P` and select "Go: Generate Unit Test For Function".

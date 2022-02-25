@@ -85,7 +85,7 @@ patron -m "github.com/beatlabs/test" -p "test"
 - Consul, as a distributed KV store
 - A service that monitors Kubernetes for new deployments in order to update the available configuration from the newly deployed service.
 
-Any service that wants to participate in the above ecosystem has to provide a endpoint which exposes the available configuration options.
+Any service that wants to participate in the above ecosystem has to provide an endpoint which exposes the available configuration options.
 
 `Harvester` is used in the final services to help managing and updating configuration.
 

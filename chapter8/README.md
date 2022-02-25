@@ -71,7 +71,7 @@ What is required?
 
 Hint: In order to parse times from DB you need to add `?parseTime=true` to the DSN string.
 
-## Working with the `http` and `encoding\json` package
+## Working with the `http` and `encoding/json` package
 
 Let's build up on the previous exercise and create a HTTP server that supports the above actions using JSON.
 In order to learn how the http package works we should only use std http package instead of Patron, which makes a lot of things easier.

@@ -91,6 +91,15 @@ You can even select the specific version with:
 go get github.com/beatlabs/patron@v0.25.0
 ```
 
+> Since Go 1.16, installing executables with `go get` in module mode is deprecated,
+> and is more focused on managing requirements in `go.mod`.
+> To install using requirements of the current module, use `go install`.
+>
+> When used with a version suffix (like @latest or @v1.4.6), `go install` builds packages in
+> module-aware mode, ignoring the `go.mod` file in the current directory or any parent directory, if
+> there is one. This is useful for installing executables without affecting the dependencies of
+> the main module.
+
 Every time go mod is changed we have to make sure that everything is synced by calling `go mod tidy` and `go mod vendor` to sync if vendoring is used.
 
 ### Removing a module
@@ -108,7 +117,7 @@ It is always good to have the dependencies in a consistent state which can be ac
 go mod tidy
 ```
 
-which adds missing and remove unused modules.
+which adds missing and removes unused modules.
 
 ### IDE Integration
 
